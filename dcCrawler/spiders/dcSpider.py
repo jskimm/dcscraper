@@ -7,7 +7,7 @@ from dcCrawler.items import DccrawlerItem
 class dcCrawlerSpider(scrapy.Spider):
     name = "dcCrawler"
     def start_requests(self):
-        for i in range(1):
+        for i in range(0,1000):
             yield scrapy.Request(
                 "https://gall.dcinside.com/board/lists/?id=leagueoflegends3&page={}".format(i+1), self.parse_url )
 
@@ -30,15 +30,20 @@ class dcCrawlerSpider(scrapy.Spider):
         data = {
             "id": _query['id'], "no": _query['no'], "cpage": _query['page'], "managerskill":"", "del_scope": "1", "csort": ""
             }
+        time.sleep(1)
         yield scrapy.FormRequest(
             "https://m.dcinside.com/ajax/response-comment",
-            formdata  = data, callback = self.parse_comment,
+            formdata  = data, callback = self.parse_comments,
             cb_kwargs = _query
         )
     
 
-    def parse_comment(self, response, id, no, page, title):
-        print(id, no, title)
-        print(response.xpath('/html/body/ul/li/p/text()').extract())
-        
-        
+    def parse_comments(self, response, id, no, page, title):
+        item = DccrawlerItem()
+        item['id'] = id
+        item['no'] = no
+        item['title'] = title
+        item['comments'] = response.xpath('/html/body/ul/li/p/text()').extract()
+        print(no, title, comments) # for debug
+
+        yield item

@@ -8,6 +8,7 @@
 import scrapy
 
 class DccrawlerItem(scrapy.Item):
+    id = scrapy.Field()
+    no = scrapy.Field()
     title = scrapy.Field()
-    comment = scrapy.Field()
-    pass
+    comments = scrapy.Field()
