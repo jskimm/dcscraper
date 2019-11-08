@@ -7,15 +7,15 @@ from dcCrawler.items import DccrawlerItem
 class dcCrawlerSpider(scrapy.Spider):
     name = "dcCrawler"
     def start_requests(self):
-        for i in range(0,1000):
+        for i in range(0,2):
+            time.sleep(3)
             yield scrapy.Request(
                 "https://gall.dcinside.com/board/lists/?id=leagueoflegends3&page={}".format(i+1), self.parse_url )
 
     def parse_url(self, response):
         for article in response.xpath('//*[@id="container"]/section[1]/article[2]/div[2]/table/tbody/tr/td[2]'):
             query = article.xpath("a[1]/@href").extract()[0]
-            print (query)
-            time.sleep(1)
+            # print (query)
             yield scrapy.Request(
                     response.urljoin(query), # article link
                     callback = self.parse_article
@@ -30,7 +30,8 @@ class dcCrawlerSpider(scrapy.Spider):
         data = {
             "id": _query['id'], "no": _query['no'], "cpage": _query['page'], "managerskill":"", "del_scope": "1", "csort": ""
             }
-        time.sleep(1)
+        # print(_query)
+        time.sleep(3)
         yield scrapy.FormRequest(
             "https://m.dcinside.com/ajax/response-comment",
             formdata  = data, callback = self.parse_comments,
@@ -43,7 +44,14 @@ class dcCrawlerSpider(scrapy.Spider):
         item['id'] = id
         item['no'] = no
         item['title'] = title
-        item['comments'] = response.xpath('/html/body/ul/li/p/text()').extract()
-        print(no, title, comments) # for debug
+        # try:
+        # print(id, title) # for debug
 
+        item['comments'] = response.xpath('/html/body/ul/li/p/text()').extract()
+        # print(item['comments'])
         yield item
+        # except:
+        #     print(response.url)
+        #     print('no comments')
+        #     pass
+
